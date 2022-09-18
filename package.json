@@ -1,6 +1,6 @@
 {
   "name": "foxes-plugin",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "基于 mirai-foxes 的插件管理器",
   "main": "dist/index.js",
   "scripts": {
