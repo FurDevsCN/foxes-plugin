@@ -78,10 +78,17 @@ export class Plugin {
   private manager: PluginManager
   private static clone<T>(data: T): T {
     if (typeof data !== 'object' || data == undefined) return data
-    const result: Record<string | symbol, unknown> = {}
-    for (const [key, value] of Object.entries(data))
-      result[key] = Plugin.clone(value)
-    return result as T
+    const result = Object.create(
+      Object.getPrototypeOf(data),
+      Object.getOwnPropertyDescriptors(data)
+    )
+    Reflect.ownKeys(data).forEach(
+      key =>
+        (result[key] = Plugin.clone(
+          (data as Record<string | symbol, unknown>)[key]
+        ))
+    )
+    return result
   }
   /**
    * 获得当前Plugin所属的bot对象，用于不用显式访问插件管理器就访问bot对象。
