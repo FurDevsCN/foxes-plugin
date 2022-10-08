@@ -1,11 +1,11 @@
 import { Bot, EventIndex, Processor } from 'mirai-foxes'
 import { Event } from 'mirai-foxes'
-export class PluginManager {
+export class PluginManager<Metadata> {
   /**
    * 插件列表。
    * 由于修改需要配合update使用，故只推荐读取列表，而不推荐直接写或调用插件。
    */
-  readonly plugins: Map<string, Plugin> = new Map()
+  readonly plugins: Map<string, Plugin<Metadata>> = new Map()
   /**
    * 插件管理器内的对应bot。
    * 插件访问bot时优先使用Plugin.bot。
@@ -59,7 +59,10 @@ export class PluginManager {
    * @param name   插件名称。
    * @param plugin 插件内容。
    */
-  install(name: string, plugin: Plugin): void {
+  install(name: string, plugin: Plugin<Metadata>): void {
+    if (plugin.metadata == undefined) {
+      throw new Error(`error installing plugin ${name} - metadata is undefined`)
+    }
     this.plugins.set(name, plugin)
     this.update()
   }
@@ -71,11 +74,11 @@ export class PluginManager {
  * 插件。
  * 如果要新建单个插件，需要指定它属于的插件管理器，这意味着，你需要new Plugin(mgr)，并传入插件生成函数，而不让插件访问PluginManager而导致越权写。
  */
-export class Plugin {
+export class Plugin<Metadata> {
   private event: Partial<
     Record<Event.EventType, Partial<Processor<Event.EventType>[]>>
   > = {}
-  private manager: PluginManager
+  private manager: PluginManager<Metadata>
   private static clone<T>(data: T): T {
     if (typeof data !== 'object' || data == undefined) return data
     const result = Object.create(
@@ -90,6 +93,10 @@ export class Plugin {
     )
     return result
   }
+  /**
+   * 当前插件的元数据。可能为空。
+   */
+  metadata?: Metadata
   /**
    * 获得当前Plugin所属的bot对象，用于不用显式访问插件管理器就访问bot对象。
    * @returns 所属bot对象。
@@ -206,7 +213,7 @@ export class Plugin {
     }
     index = this.on(type, processor)
   }
-  constructor(mgr: PluginManager) {
+  constructor(mgr: PluginManager<Metadata>) {
     this.manager = mgr
   }
 }
