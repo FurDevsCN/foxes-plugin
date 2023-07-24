@@ -5,28 +5,36 @@ name: Typescript CI
 
 on:
   push:
-    branches: ['main']
+    branches: ['master']
   pull_request:
-    branches: ['main']
+    branches: ['master']
 
 jobs:
   build:
+    environment: ci
     runs-on: ubuntu-latest
 
     strategy:
       matrix:
-        node-version: [16.x]
+        node-version: [18.x]
         # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
 
     steps:
-      - uses: actions/checkout@v3
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Checkout branch
+        uses: actions/checkout@v3
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
           cache: 'npm'
-      - run: npm ci
-      - run: npm run build --if-present
-      - uses: JS-DevTools/npm-publish@v1
+      - name: Install dependencies
+        run: npm ci
+      - name: Build foxes-plugin
+        run: npm run build --if-present
+      - name: Publish package
+        uses: JS-DevTools/npm-publish@v2
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        if: env.NPM_TOKEN != ''
         with:
-          token: ${{ secrets.NPM_TOKEN }}
+          token: ${{ env.NPM_TOKEN }}
