@@ -23,7 +23,6 @@
     "noFallthroughCasesInSwitch": true /* Report errors for fallthrough cases in switch statement. */,
     /* Module Resolution Options */
     "moduleResolution": "node",
-    "types": ["node"],
     "esModuleInterop": true,
     "baseUrl": ".",
     "paths": {
@@ -35,5 +34,5 @@
     "outDir": "dist",
     "declaration": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "tsup.config.ts"]
 }
